@@ -1,15 +1,32 @@
 pipeline {
-    agent any
+    agent { label 'ansible-controller' }
     stages {
-        stage('Clone Git Repo') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/JenniaGo/workgroup-monitor.git'
+                git 'https://github.com/your-repo/ansible-project.git'
             }
         }
-        stage('Run Ansible Playbook') {
+        stage('Run Ansible') {
             steps {
-                sh 'ansible-playbook -i inventory.txt playbook.yml'
+                ansiblePlaybook colorized: true,
+                    inventory: 'inventory.txt',
+                    playbook: 'playbook.yml'
             }
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: '*.log'
+        }
+        success {
+            mail to: 'team@example.com',
+                subject: "Nagios Deployment Successful",
+                body: "The Nagios deployment on the workgroup computers was successful."
+        }
+        failure {
+            mail to: 'team@example.com',
+                subject: "Nagios Deployment Failed",
+                body: "The Nagios deployment on the workgroup computers failed. Please check the logs for more information."
         }
     }
 }
