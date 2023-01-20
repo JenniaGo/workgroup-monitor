@@ -5,10 +5,15 @@
     nagios_agent_path: "files/nagios-agent.msi"
     nagios_server: "nagios.example.com"
   tasks:
+  - name: Download Nagios agent
+    script: scripts/download_nagios_agent.ps1
+    register: nagios_agent_downloaded
+
   - name: Install Nagios agent
     win_package:
       path: "{{ nagios_agent_path }}"
       state: present
+    when: nagios_agent_downloaded.changed
 
   - name: Configure Nagios agent
     win_reg_stat:
@@ -16,3 +21,20 @@
       name: Server
       data: "{{ nagios_server }}"
       state: present
+    when: nagios_agent_downloaded.changed
+
+  - name: Configure Nagios agent to monitor CPU
+    win_reg_stat:
+      path: "HKLM:\Software\Nagios"
+      name: CheckCPU
+      data: "1"
+      state: present
+    when: nagios_agent_downloaded.changed
+
+  - name: Configure Nagios agent to monitor location
+    win_reg_stat:
+      path: "HKLM:\Software\Nagios"
+      name: CheckLocation
+      data: "1"
+      state: present
+    when: nagios_agent_downloaded.changed
