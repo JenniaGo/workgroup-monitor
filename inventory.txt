@@ -1,0 +1,5 @@
+pc1.workgroup.local
+pc2.workgroup.local
+pc3.workgroup.local
+...
+pc600.workgroup.local
